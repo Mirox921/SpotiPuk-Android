@@ -89,3 +89,7 @@ Use [Issues](https://github.com/Mirox921/SpotiPuk-Android/issues) to report a bu
 The version badge reads the Android source version. Stars and download counts are refreshed daily. The download count covers assets published through this repository's GitHub Releases.
 
 SpotiPuk is an independent project and is unaffiliated with Spotify. Earlier versions drew on deviato's Spotifuck project. The Ember interface uses the Saira typeface. [Saira font license](docs/third-party/Saira-OFL.txt)
+
+## License
+
+SpotiPuk's Android source code is licensed under the GNU General Public License, version 3 only (`GPL-3.0-only`). See [LICENSE](LICENSE). Third-party components and assets are governed by their respective license terms.

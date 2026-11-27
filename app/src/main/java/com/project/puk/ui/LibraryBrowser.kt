@@ -66,17 +66,18 @@ internal fun LibraryBrowser(pages: PagedList<Card>, searchPages: android.util.Lr
     var folderToEdit by remember { mutableStateOf<Card?>(null) }
     var movingServerCard by remember { mutableStateOf<Card?>(null) }
     var serverBusy by remember { mutableStateOf(false) }
-    var serverError by remember { mutableStateOf<String?>(null) }
+    var serverChangeFailed by remember { mutableStateOf(false) }
+    val serverError = if (serverChangeFailed) Lang.t(Lang.Key.LIB_SERVER_CHANGE_ERROR) else null
     fun performServerChange(change: suspend () -> Boolean, onSuccess: () -> Unit = {}) {
         if (serverBusy) return
         serverBusy = true
-        serverError = null
+        serverChangeFailed = false
         scope.launch {
             try {
                 if (change()) {
                     onSuccess()
                     onRefresh()
-                } else serverError = Lang.t(Lang.Key.LIB_SERVER_CHANGE_ERROR)
+                } else serverChangeFailed = true
             } finally { serverBusy = false }
         }
     }

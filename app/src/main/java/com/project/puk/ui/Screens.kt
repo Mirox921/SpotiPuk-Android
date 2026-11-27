@@ -187,7 +187,7 @@ fun HomeScreen(
     val activeFacet = if (serverFacets.isEmpty()) facet else serverFacet
     val selectedParent = serverFacets.firstOrNull { it.id == serverFacet || it.children.any { child -> child.id == serverFacet } }
     val facetChoices = if (serverFacets.isEmpty()) listOf("all" to Lang.t(Lang.Key.LIB_FACET_ALL), "music" to Lang.t(Lang.Key.LIB_MUSIC), "podcasts" to Lang.t(Lang.Key.LIB_PODCASTS))
-    else (listOf("" to Lang.t(Lang.Key.LIB_FACET_ALL)) + serverFacets.map { it.id to it.label } + selectedParent?.children.orEmpty().map { it.id to it.label }).distinctBy { it.first }
+    else (listOf("" to Lang.t(Lang.Key.LIB_FACET_ALL)) + serverFacets.map { it.id to it.displayLabel } + selectedParent?.children.orEmpty().map { it.id to it.displayLabel }).distinctBy { it.first }
     val visible = available.mapNotNull { section ->
         val items = section.items.filter { card ->
             val supported = card.kind == "track" || card.target() != null
@@ -347,14 +347,14 @@ fun HomeScreen(
                         val track = card.takeIf { it.uri.startsWith("spotify:track:") }?.let {
                             TrackRow(it.uri, it.uri.substringAfterLast(':'), it.title, it.subtitle, "", "", it.imageUrl, 0L)
                         }
-                        HomeRecommendationRow(card, reason = section.title.takeUnless { it == Lang.t(Lang.Key.LIB_FOR_YOU) }.orEmpty(),
+                        HomeRecommendationRow(card, reason = section.displayTitle.takeUnless { it == Lang.t(Lang.Key.LIB_FOR_YOU) }.orEmpty(),
                             onTrackActions = track?.let { { onTrackActions(it) } },
                             onOpen = { if (track != null) onPlay(listOf(track), 0) else card.target()?.let(onOpen) })
                     }
                 } else {
                     item(key = "section:$sectionKey") {
                         Text(
-                            section.title,
+                            section.displayTitle,
                             style = MaterialTheme.typography.titleLarge,
                             modifier = Modifier.padding(horizontal = 16.dp),
                         )
@@ -551,7 +551,8 @@ fun SearchScreen(searchCache: android.util.LruCache<String, Spotify.SearchResult
         }
         if (query.isBlank()) {
             SectionHeader(Lang.t(Lang.Key.LIB_ALL_CATEGORIES))
-            val catalog = remember(context, homeSections, recentTracks) {
+            val language = Lang.current
+            val catalog = remember(context, homeSections, recentTracks, language) {
                 CatalogRepository(
                     HomeCatalogProvider(homeSections.orEmpty()),
                     RecentCatalogProvider(recentTracks),
@@ -993,7 +994,7 @@ fun CardTile(card: Card, showPlay: Boolean = false, onTrackActions: (() -> Unit)
             .clip(RoundedCornerShape(12.dp))
             .then(
                 if (actions == null) Modifier.clickable(press, LocalIndication.current, onClick = onClick)
-                else Modifier.contextGesture(card.title, onClick, actions, press),
+                else Modifier.contextGesture(card.displayTitle, onClick, actions, press),
             )
             .padding(4.dp),
     ) {
@@ -1005,8 +1006,8 @@ fun CardTile(card: Card, showPlay: Boolean = false, onTrackActions: (() -> Unit)
                 Box(
                     Modifier.align(Alignment.BottomEnd).padding(4.dp).size(48.dp)
                         .clip(CircleShape).background(MaterialTheme.colorScheme.primary)
-                        .clickable(enabled = !playLoading, onClickLabel = Lang.t(Lang.Key.LIB_PLAY_TITLE, card.title), onClick = onPlay ?: onClick)
-                        .semantics { contentDescription = if (playLoading) Lang.t(Lang.Key.LIB_LOADING_TITLE, card.title) else Lang.t(Lang.Key.LIB_PLAY_TITLE, card.title) },
+                        .clickable(enabled = !playLoading, onClickLabel = Lang.t(Lang.Key.LIB_PLAY_TITLE, card.displayTitle), onClick = onPlay ?: onClick)
+                        .semantics { contentDescription = if (playLoading) Lang.t(Lang.Key.LIB_LOADING_TITLE, card.displayTitle) else Lang.t(Lang.Key.LIB_PLAY_TITLE, card.displayTitle) },
                     contentAlignment = Alignment.Center,
                 ) {
                     if (playLoading) CircularProgressIndicator(Modifier.size(20.dp), color = MaterialTheme.colorScheme.onPrimary, strokeWidth = 2.dp) else Icon(EmberIcons.PlayArrow, contentDescription = null, tint = MaterialTheme.colorScheme.onPrimary)
@@ -1014,7 +1015,7 @@ fun CardTile(card: Card, showPlay: Boolean = false, onTrackActions: (() -> Unit)
             }
         }
         Spacer(Modifier.height(6.dp))
-        Text(card.title, style = MaterialTheme.typography.labelLarge, maxLines = 2, overflow = TextOverflow.Ellipsis)
+        Text(card.displayTitle, style = MaterialTheme.typography.labelLarge, maxLines = 2, overflow = TextOverflow.Ellipsis)
         if (card.subtitle.isNotBlank()) {
             Text(
                 card.subtitle,
@@ -1029,13 +1030,14 @@ fun CardTile(card: Card, showPlay: Boolean = false, onTrackActions: (() -> Unit)
 
 @Composable
 fun ListRow(card: Card, inLibrary: Boolean = false, showKind: Boolean = true, onMoveInLibrary: (() -> Unit)? = null, libraryFolder: String? = null, onClick: () -> Unit) {
+    val kindLabel = if (card.savedEpisodes) Lang.t(Lang.Key.LIB_SAVED_EPISODES) else mediaKindLabel(card.kind)
     val actions = cardActions(card, onClick, inLibrary = inLibrary, onMoveInLibrary = onMoveInLibrary, libraryFolder = libraryFolder)
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp),
         modifier = Modifier
             .fillMaxWidth()
-            .then(if (actions == null) Modifier.clickable(onClick = onClick) else Modifier.contextGesture(card.title, onClick, actions))
+            .then(if (actions == null) Modifier.clickable(onClick = onClick) else Modifier.contextGesture(card.displayTitle, onClick, actions))
             .padding(horizontal = 16.dp, vertical = 6.dp),
     ) {
         if (card.target() == Target.Liked) {
@@ -1044,10 +1046,10 @@ fun ListRow(card: Card, inLibrary: Boolean = false, showKind: Boolean = true, on
             Artwork(url = card.imageUrl, modifier = Modifier.size(64.dp), circular = card.kind == "artist")
         }
         Column(modifier = Modifier.weight(1f)) {
-            Text(card.title, style = MaterialTheme.typography.titleSmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(card.displayTitle, style = MaterialTheme.typography.titleSmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
             if (card.subtitle.isNotBlank()) {
                 Text(
-                    if (showKind) "${if (card.savedEpisodes) "Сохранённые эпизоды" else mediaKindLabel(card.kind)} • ${card.subtitle}" else card.subtitle,
+                    if (showKind) "$kindLabel • ${card.subtitle}" else card.subtitle,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,
@@ -1055,7 +1057,7 @@ fun ListRow(card: Card, inLibrary: Boolean = false, showKind: Boolean = true, on
                 )
             } else {
                 Text(
-                    if (card.savedEpisodes) Lang.t(Lang.Key.LIB_SAVED_EPISODES) else mediaKindLabel(card.kind),
+                    kindLabel,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )

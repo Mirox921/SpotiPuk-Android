@@ -132,6 +132,7 @@ internal class HomeCatalogProvider(home: List<Section>) : CatalogProvider {
 }
 
 internal class EditorialCatalogProvider(context: Context) : CatalogProvider {
+    private val editions = localizedEditions()
     private val cache = context.getSharedPreferences("catalog_oembed_v1", Context.MODE_PRIVATE)
     private val thumbnails = context.assets.open("catalog_thumbnails.json").bufferedReader().use {
         JSONObject(it.readText())
@@ -217,7 +218,7 @@ internal class EditorialCatalogProvider(context: Context) : CatalogProvider {
             listOf(Section(Lang.t(Lang.Key.CAT_THEMED_PLAYLISTS), listOf(playlist(playlistId, playlistTitle, owner)))),
         )
 
-        val editions = listOf(
+        fun localizedEditions() = listOf(
             edition("pop", Lang.t(Lang.Key.CAT_POP), 0xFF793351, Section(Lang.t(Lang.Key.CAT_SYNTH_POP), listOf(emotion, emotionB)), Section(Lang.t(Lang.Key.CAT_HITS), listOf(hits))),
             edition("hip-hop", Lang.t(Lang.Key.CAT_HIP_HOP), 0xFF75512D, Section(Lang.t(Lang.Key.LIB_ALBUMS), listOf(
                 album("7ycBtnsMtyVbbwTfJwRjSP", "To Pimp a Butterfly", "Kendrick Lamar"),

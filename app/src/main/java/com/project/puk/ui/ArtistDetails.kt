@@ -118,7 +118,7 @@ internal fun ArtistDetails(route: ContentRoute, uri: String, onBack: () -> Unit,
                     val cards = shelf.items.filter { it.target() != null }
                     if (cards.isEmpty()) continue
                     item(key = shelf.sourceId) {
-                        ArtistSectionTitle(shelf.title)
+                        ArtistSectionTitle(shelf.displayTitle)
                         LazyRow(contentPadding = PaddingValues(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                             items(cards, key = Card::uri) { related -> CardTile(related) { related.target()?.let(onOpen) } }
                         }
@@ -147,7 +147,7 @@ internal fun ArtistDetails(route: ContentRoute, uri: String, onBack: () -> Unit,
         page.monthlyListeners?.let { Text(Lang.t(Lang.Key.ART_MONTHLY_LISTENERS, java.text.NumberFormat.getIntegerInstance().format(it))) }
         page.followers?.let { Text(Lang.t(Lang.Key.ART_FOLLOWERS, java.text.NumberFormat.getIntegerInstance().format(it))) }
         if (page.biography.isNotBlank()) Text(remember(page.biography) { HtmlCompat.fromHtml(page.biography, HtmlCompat.FROM_HTML_MODE_COMPACT).toString() })
-        page.links.forEach { (label, url) -> SheetAction(com.project.puk.R.drawable.ember_ctx_open_external, label) { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url))) } }
+        page.links.forEach { (label, url) -> SheetAction(com.project.puk.R.drawable.ember_ctx_open_external, label.ifBlank { Lang.t(Lang.Key.API_ARTIST_LINK) }) { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url))) } }
     })
 }
 

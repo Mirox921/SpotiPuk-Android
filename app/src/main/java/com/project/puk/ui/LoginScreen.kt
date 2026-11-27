@@ -74,7 +74,7 @@ private val accountLayoutScript = """
 fun LoginScreen(onLoggedIn: () -> Unit) {
     val context = LocalContext.current
     var webView by remember { mutableStateOf<WebView?>(null) }
-    var status by remember { mutableStateOf(Lang.t(Lang.Key.LOGIN_SIGN_IN_SPOTIFY)) }
+    var status by remember { mutableStateOf(Lang.Key.LOGIN_SIGN_IN_SPOTIFY) }
 
     var loadFailed by remember { mutableStateOf(false) }
 
@@ -94,10 +94,10 @@ fun LoginScreen(onLoggedIn: () -> Unit) {
                         onLoggedIn()
                         break
                     }
-                    status = Lang.t(Lang.Key.LOGIN_CHECKING_ACCOUNT)
+                    status = Lang.Key.LOGIN_CHECKING_ACCOUNT
                     Auth.invalidateToken(context)
                 } catch (cancelled: kotlinx.coroutines.CancellationException) { throw cancelled }
-                catch (_: Exception) { status = Lang.t(Lang.Key.LOGIN_CHECK_RETRYING) }
+                catch (_: Exception) { status = Lang.Key.LOGIN_CHECK_RETRYING }
                 delay(2_000L)
             }
             delay(700L)
@@ -109,7 +109,7 @@ fun LoginScreen(onLoggedIn: () -> Unit) {
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Text(
-            text = if (loadFailed) Lang.t(Lang.Key.LOGIN_PAGE_LOAD_FAILED) else status,
+            text = Lang.t(if (loadFailed) Lang.Key.LOGIN_PAGE_LOAD_FAILED else status),
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.primary,
             modifier = Modifier.padding(16.dp),
@@ -142,7 +142,7 @@ fun LoginScreen(onLoggedIn: () -> Unit) {
                     webViewClient = object : WebViewClient() {
                         override fun onPageStarted(view: WebView, url: String?, favicon: Bitmap?) {
                             loadFailed = false
-                            status = Lang.t(Lang.Key.LOGIN_LOADING_SPOTIFY)
+                            status = Lang.Key.LOGIN_LOADING_SPOTIFY
                         }
 
                         override fun onReceivedError(
@@ -169,9 +169,9 @@ fun LoginScreen(onLoggedIn: () -> Unit) {
                                 if (!supportsDocumentStart) {
                                     view.evaluateJavascript(accountLayoutScript, null)
                                 }
-                                Lang.t(Lang.Key.LOGIN_SIGN_IN_PROMPT)
+                                Lang.Key.LOGIN_SIGN_IN_PROMPT
                             } else {
-                                Lang.t(Lang.Key.LOGIN_LOADING_SPOTIFY)
+                                Lang.Key.LOGIN_LOADING_SPOTIFY
                             }
                         }
                     }

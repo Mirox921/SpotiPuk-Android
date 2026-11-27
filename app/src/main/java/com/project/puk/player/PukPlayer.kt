@@ -1335,8 +1335,8 @@ class PukPlayer(private val context: Context) {
     }
 
     companion object {
-        val LICENSE_NETWORK_REQUIRED get() = Lang.t(Lang.Key.PUK_LICENSE_NETWORK)
-        val LICENSE_RATE_LIMITED get() = Lang.t(Lang.Key.PUK_LICENSE_RATE_LIMITED)
+        internal const val LICENSE_NETWORK_REQUIRED = "license_network_required"
+        internal const val LICENSE_RATE_LIMITED = "license_rate_limited"
     }
 
     fun release() = onMain {

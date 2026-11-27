@@ -265,7 +265,12 @@ fun isSupportedTrackUri(uri: String): Boolean = TRACK_URI_REGEX.matches(uri)
  * `error` code that must not surface as raw English (expired/revoked/missing
  * invites and an unreachable server are the common owner-reported cases).
  */
+internal class JamJoinException(private val errorCode: String, private val fallback: String? = null) : IllegalStateException() {
+    override val message: String get() = jamJoinErrorMessage(errorCode, fallback)
+}
+
 fun jamJoinErrorMessage(errorCode: String, fallback: String?): String = when (errorCode) {
+    "server_unavailable" -> Lang.t(Lang.Key.JAM_SERVER_UNAVAILABLE)
     "session_not_found" -> Lang.t(Lang.Key.JAM_INVITE_NOT_FOUND)
     "invite_expired" -> Lang.t(Lang.Key.JAM_INVITE_EXPIRED)
     "invite_revoked" -> Lang.t(Lang.Key.JAM_INVITE_REVOKED)

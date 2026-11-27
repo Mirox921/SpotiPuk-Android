@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="104" height="28" role="img" aria-label="Stars: 0">
+  <title>Stars: 0</title>
+  <rect width="104" height="28" rx="5" fill="#23252e"/>
+  <path d="M62 0 H99 Q104 0 104 5 V23 Q104 28 99 28 H62 Z" fill="#ffd48e"/>
+  <g font-family="Verdana, sans-serif" font-size="11" font-weight="bold" text-anchor="middle" dominant-baseline="middle">
+    <text x="31.0" y="15" fill="#ffffff">Stars</text>
+    <text x="83.0" y="15" fill="#16151a">0</text>
+  </g>
+</svg>

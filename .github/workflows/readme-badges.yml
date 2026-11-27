@@ -1,0 +1,37 @@
+name: Refresh README badges
+
+on:
+  schedule:
+    - cron: "27 5 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: readme-badges
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    if: github.ref_name == github.event.repository.default_branch
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - name: Refresh repository counts
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          stars=$(gh api "repos/$GITHUB_REPOSITORY" --jq .stargazers_count)
+          downloads=$(gh api --paginate "repos/$GITHUB_REPOSITORY/releases?per_page=100" \
+            --jq '[.[] | select(.draft == false) | .assets[].download_count] | add // 0' | jq -s 'add // 0')
+          python3 .github/scripts/render_badges.py "$stars" "$downloads"
+          if git diff --quiet -- docs/badges; then
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- docs/badges
+          git commit -m "Refresh README badges"
+          git push

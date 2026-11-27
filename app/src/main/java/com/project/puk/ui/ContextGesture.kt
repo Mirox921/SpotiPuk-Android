@@ -8,8 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.res.stringResource
-import com.project.puk.R
+import com.project.puk.core.Lang
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -33,4 +32,4 @@ internal fun Modifier.contextGesture(
 }
 
 @Composable
-internal fun contextActionLabel(title: String): String = stringResource(R.string.context_more_actions, title)
+internal fun contextActionLabel(title: String): String = Lang.t(Lang.Key.CONTEXT_MORE_ACTIONS, title)

@@ -26,20 +26,30 @@ object AppUpdater {
         val versionName: String,
         val url: String,
         val sha256: String?,
-        val notes: List<String>,
-    )
+        private val notesRu: List<String>,
+        private val notesEn: List<String>?,
+    ) {
+        val notes: List<String> get() = if (Lang.current == Lang.Code.RU) notesRu else notesEn ?: notesRu
+    }
 
     data class HistoryEntry(
         val versionName: String,
         val versionCode: Int,
-        val date: String,
-        val notes: List<String>,
-    )
+        private val dateRu: String,
+        private val dateEn: String,
+        private val notesRu: List<String>,
+        private val notesEn: List<String>?,
+    ) {
+        val date: String get() = if (Lang.current == Lang.Code.RU) dateRu else dateEn.ifBlank { dateRu }
+        val notes: List<String> get() = if (Lang.current == Lang.Code.RU) notesRu else notesEn ?: notesRu
+    }
 
     sealed interface CheckResult {
         data class Newer(val info: Info) : CheckResult
         data object UpToDate : CheckResult
-        data class Failed(val message: String) : CheckResult
+        data class Failed(val messageKey: Lang.Key) : CheckResult {
+            val message: String get() = Lang.t(messageKey)
+        }
     }
 
     /** Pure parse: malformed JSON or missing versionCode/url → null. */
@@ -53,17 +63,14 @@ object AppUpdater {
             versionName = o.optString("versionName", "").ifBlank { "…" },
             url = url,
             sha256 = o.optString("sha256", "").trim().ifEmpty { null },
-            notes = buildList {
-                // Non-RU locales read changelogEn when the manifest provides it.
-                val arr = (if (Lang.current != Lang.Code.RU) o.optJSONArray("changelogEn") else null)
-                    ?: o.optJSONArray("changelog")
-                    ?: return@buildList
-                for (i in 0 until arr.length()) {
-                    arr.optString(i, "").takeIf { it.isNotBlank() }?.let { add(it) }
-                }
-            },
+            notesRu = o.notes("changelog").orEmpty(),
+            notesEn = o.notes("changelogEn"),
         )
     }.getOrNull()
+
+    private fun org.json.JSONObject.notes(key: String): List<String>? = optJSONArray(key)?.let { entries ->
+        List(entries.length()) { entries.optString(it, "") }.filter(String::isNotBlank)
+    }
 
     fun isNewer(info: Info?, currentVersionCode: Int): Boolean =
         info != null && info.versionCode > currentVersionCode
@@ -77,10 +84,10 @@ object AppUpdater {
             context.packageManager.getPackageInfo(context.packageName, 0).versionCode
         }.getOrDefault(BuildConfig.VERSION_CODE)
         val response = runCatching { Net.get(UPDATE_MANIFEST_URL, tag = TAG) }.getOrNull()
-            ?: return CheckResult.Failed(Lang.t(Lang.Key.UPDATES_SERVER_UNAVAILABLE))
-        if (!response.ok) return CheckResult.Failed(Lang.t(Lang.Key.UPDATES_SERVER_UNAVAILABLE))
+            ?: return CheckResult.Failed(Lang.Key.UPDATES_SERVER_UNAVAILABLE)
+        if (!response.ok) return CheckResult.Failed(Lang.Key.UPDATES_SERVER_UNAVAILABLE)
         val info = parse(response.body)
-            ?: return CheckResult.Failed(Lang.t(Lang.Key.UPDATES_BAD_RESPONSE))
+            ?: return CheckResult.Failed(Lang.Key.UPDATES_BAD_RESPONSE)
         return if (isNewer(info, installed)) {
             CheckResult.Newer(info)
         } else {
@@ -96,24 +103,19 @@ object AppUpdater {
     suspend fun history(): List<HistoryEntry> {
         val response = runCatching { Net.get(HISTORY_MANIFEST_URL, tag = TAG) }.getOrNull() ?: return emptyList()
         if (!response.ok) return emptyList()
-        val wantEn = Lang.current != Lang.Code.RU
         return runCatching {
             val arr = org.json.JSONObject(response.body).optJSONArray("releases") ?: return emptyList()
             buildList {
                 for (i in 0 until arr.length()) {
                     val o = arr.optJSONObject(i) ?: continue
-                    val notesArr = (if (wantEn) o.optJSONArray("notesEn") else null) ?: o.optJSONArray("notes")
-                    val notes = buildList {
-                        if (notesArr != null) for (j in 0 until notesArr.length()) {
-                            notesArr.optString(j, "").takeIf { it.isNotBlank() }?.let { add(it) }
-                        }
-                    }
                     add(
                         HistoryEntry(
                             versionName = o.optString("versionName", ""),
                             versionCode = o.optInt("versionCode", 0),
-                            date = if (wantEn) o.optString("dateEn", "").ifBlank { o.optString("date", "") } else o.optString("date", ""),
-                            notes = notes,
+                            dateRu = o.optString("date"),
+                            dateEn = o.optString("dateEn"),
+                            notesRu = o.notes("notes").orEmpty(),
+                            notesEn = o.notes("notesEn"),
                         ),
                     )
                 }

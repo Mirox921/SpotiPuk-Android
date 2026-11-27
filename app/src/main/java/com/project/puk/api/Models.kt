@@ -1,5 +1,7 @@
 package com.project.puk.api
 
+import com.project.puk.core.Lang
+
 /** Small, UI-facing data shapes. Parsing lives next to the queries in Spotify.kt. */
 
 data class TrackRow(
@@ -26,13 +28,21 @@ data class Card(
     val kind: String, // playlist / album / artist / podcast / track
     val savedEpisodes: Boolean = false,
     val pinned: Boolean? = null,
-)
+) {
+    val displayTitle: String get() = when {
+        savedEpisodes -> Lang.t(Lang.Key.AUTO_YOUR_EPISODES)
+        kind == "collection" -> Lang.t(Lang.Key.JAM_LIKED_TRACKS)
+        else -> title
+    }
+}
 
 /** One role group of track credits, e.g. "Авторы музыки" or "Продюсеры". */
 data class CreditGroup(
     val role: String,
     val names: List<String>,
-)
+) {
+    val displayRole: String get() = role.ifBlank { Lang.t(Lang.Key.API_OTHERS) }
+}
 
 /** Full credits of a track as reported by the web player's credits query. */
 data class TrackCredits(
@@ -48,9 +58,15 @@ data class Section(
     val items: List<Card>,
     val sourceId: String = "",
     val layout: HomeSectionLayout = HomeSectionLayout.UNSPECIFIED,
-)
+    val titleKey: Lang.Key? = null,
+) {
+    val displayTitle: String get() = titleKey?.let { Lang.t(it) } ?: title
+}
 
-data class HomeFacet(val id: String, val label: String, val children: List<HomeFacet>)
+data class HomeFacet(val id: String, val label: String, val children: List<HomeFacet>) {
+    internal val labelKey = Lang.homeFacetKey(label)
+    val displayLabel: String get() = labelKey?.let { Lang.t(it) } ?: label
+}
 
 data class HomeFeed(val sections: List<Section>, val facets: List<HomeFacet>)
 
@@ -152,7 +168,10 @@ data class EpisodeDetail(
 
 /** One podcast chapter span; title may be empty when the source has none. */
 data class ChapterSpan(
-    val title: String,
+    private val sourceTitle: String,
     val startMs: Long,
     val endMs: Long,
-)
+    private val number: Int? = null,
+) {
+    val title: String get() = sourceTitle.ifBlank { number?.let { Lang.t(Lang.Key.API_CHAPTER, it) }.orEmpty() }
+}

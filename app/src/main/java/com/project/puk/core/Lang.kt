@@ -143,6 +143,7 @@ object Lang {
         PLAYER_PLAY_NEXT,
         PLAYER_QUEUE_EDIT_NO_SHUFFLE,
         PLAYER_MORE_ACTIONS,
+        CONTEXT_MORE_ACTIONS,
         PLAYER_VIDEO_QUALITY,
         PLAYER_QUALITY_AUTO,
         PLAYER_NOW_PLAYING,
@@ -658,6 +659,12 @@ object Lang {
         Code.DE -> de[key] ?: ru.getValue(key)
     }
 
+    internal fun homeFacetKey(label: String): Key? {
+        val dictionaries = listOf(ru, en, uk, pl, de)
+        return listOf(Key.HOME_FACET_ALL, Key.HOME_FACET_MUSIC, Key.HOME_FACET_PODCASTS, Key.HOME_FACET_AUDIOBOOKS)
+            .firstOrNull { key -> dictionaries.any { it[key].equals(label, ignoreCase = true) } }
+    }
+
     // Test accessors (LangTest asserts dictionary completeness per locale).
     internal fun ruForTest(): Map<Key, String> = ru
     internal fun enForTest(): Map<Key, String> = en
@@ -928,6 +935,7 @@ object Lang {
         Key.PLAYER_PLAY_NEXT to "Воспроизвести следующим",
         Key.PLAYER_QUEUE_EDIT_NO_SHUFFLE to "Редактирование очереди доступно без перемешивания.",
         Key.PLAYER_MORE_ACTIONS to "Другие действия",
+        Key.CONTEXT_MORE_ACTIONS to "Дополнительные действия для %s",
         Key.PLAYER_VIDEO_QUALITY to "Качество видео",
         Key.PLAYER_QUALITY_AUTO to "Авто",
         Key.PLAYER_NOW_PLAYING to "Сейчас играет",
@@ -1600,6 +1608,7 @@ object Lang {
         Key.PLAYER_PLAY_NEXT to "Play next",
         Key.PLAYER_QUEUE_EDIT_NO_SHUFFLE to "Queue editing is available without shuffle.",
         Key.PLAYER_MORE_ACTIONS to "Other actions",
+        Key.CONTEXT_MORE_ACTIONS to "More actions for %s",
         Key.PLAYER_VIDEO_QUALITY to "Video quality",
         Key.PLAYER_QUALITY_AUTO to "Auto",
         Key.PLAYER_NOW_PLAYING to "Now playing",
@@ -2272,6 +2281,7 @@ object Lang {
         Key.PLAYER_PLAY_NEXT to "Відтворити наступним",
         Key.PLAYER_QUEUE_EDIT_NO_SHUFFLE to "Редагування черги доступне без перемішування.",
         Key.PLAYER_MORE_ACTIONS to "Інші дії",
+        Key.CONTEXT_MORE_ACTIONS to "Додаткові дії для %s",
         Key.PLAYER_VIDEO_QUALITY to "Якість відео",
         Key.PLAYER_QUALITY_AUTO to "Авто",
         Key.PLAYER_NOW_PLAYING to "Зараз грає",
@@ -2944,6 +2954,7 @@ object Lang {
         Key.PLAYER_PLAY_NEXT to "Odtwórz jako następny",
         Key.PLAYER_QUEUE_EDIT_NO_SHUFFLE to "Edytowanie kolejki jest dostępne bez losowej kolejności.",
         Key.PLAYER_MORE_ACTIONS to "Inne działania",
+        Key.CONTEXT_MORE_ACTIONS to "Więcej działań dla %s",
         Key.PLAYER_VIDEO_QUALITY to "Jakość wideo",
         Key.PLAYER_QUALITY_AUTO to "Auto",
         Key.PLAYER_NOW_PLAYING to "Teraz odtwarzane",
@@ -3616,6 +3627,7 @@ object Lang {
         Key.PLAYER_PLAY_NEXT to "Als Nächstes wiedergeben",
         Key.PLAYER_QUEUE_EDIT_NO_SHUFFLE to "Bearbeiten der Warteschlange ist ohne Shuffle möglich.",
         Key.PLAYER_MORE_ACTIONS to "Weitere Aktionen",
+        Key.CONTEXT_MORE_ACTIONS to "Weitere Aktionen für %s",
         Key.PLAYER_VIDEO_QUALITY to "Videoqualität",
         Key.PLAYER_QUALITY_AUTO to "Auto",
         Key.PLAYER_NOW_PLAYING to "Wird wiedergegeben",

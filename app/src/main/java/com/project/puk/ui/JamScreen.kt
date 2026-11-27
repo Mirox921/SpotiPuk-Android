@@ -150,7 +150,7 @@ fun JamScreen(
     var showJoin by rememberSaveable { mutableStateOf(false) }
     var showAddMusic by rememberSaveable { mutableStateOf(false) }
     var joining by remember { mutableStateOf(false) }
-    var error by remember { mutableStateOf<String?>(null) }
+    var error by remember { mutableStateOf<Pair<Throwable, Lang.Key>?>(null) }
 
     fun joinWith(code: String) {
         joining = true
@@ -160,7 +160,7 @@ fun JamScreen(
             joining = false
             result
                 .onSuccess { showJoin = false; onConsumePendingCode() }
-                .onFailure { error = it.message ?: Lang.t(Lang.Key.JAM_JOIN_FAILED) }
+                .onFailure { error = it to Lang.Key.JAM_JOIN_FAILED }
         }
     }
 
@@ -242,7 +242,7 @@ fun JamScreen(
                     color = MaterialTheme.colorScheme.onSurface,
                 )
                 Text(
-                    "Общая очередь, синхронное воспроизведение и права участников. KEEP " +
+                    Lang.t(Lang.Key.JAM_INTRO_QUEUE_LINE).trimEnd() + " " +
                         Lang.t(Lang.Key.JAM_INTRO_OWN_ACCOUNT_LINE),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -267,7 +267,7 @@ fun JamScreen(
                             scope.launch {
                                 val result = controller.createSession("", "", JamPermissions())
                                 joining = false
-                                result.onFailure { error = it.message ?: Lang.t(Lang.Key.JAM_CREATE_SESSION_FAILED) }
+                                result.onFailure { error = it to Lang.Key.JAM_CREATE_SESSION_FAILED }
                             }
                         },
                         modifier = Modifier.fillMaxWidth(),
@@ -284,8 +284,8 @@ fun JamScreen(
                         },
                         modifier = Modifier.fillMaxWidth(),
                     ) { Text(Lang.t(Lang.Key.JAM_SCAN_QR_CODE)) }
-                    error?.let {
-                        Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
+                    error?.let { (failure, fallback) ->
+                        Text(failure.message ?: Lang.t(fallback), color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
                     }
                 }
             }

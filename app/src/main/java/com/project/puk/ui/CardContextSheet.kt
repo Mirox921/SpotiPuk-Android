@@ -76,7 +76,7 @@ private fun CardContextSheet(
         ) {
             Artwork(card.imageUrl, Modifier.size(104.dp), circular = card.kind == "artist")
             Text(
-                card.title,
+                card.displayTitle,
                 Modifier.padding(horizontal = 24.dp, vertical = 12.dp),
                 style = MaterialTheme.typography.titleLarge,
                 textAlign = TextAlign.Center,
@@ -106,7 +106,7 @@ private fun CardContextSheet(
                 context.startActivity(Intent.createChooser(share, null))
             }
             SheetAction(R.drawable.ember_ctx_copy_link, Lang.t(Lang.Key.SHEET_COPY_LINK)) {
-                copyContextText(context, card.title, shareUrl)
+                copyContextText(context, card.displayTitle, shareUrl)
             }
         }
     }
@@ -243,7 +243,7 @@ internal fun CardLibraryAction(card: Card, inLibrary: Boolean, onChanged: () -> 
         AlertDialog(
             onDismissRequest = { confirmRemoval = false },
             title = { Text(Lang.t(Lang.Key.SHEET_REMOVE_PLAYLIST_CONFIRM)) },
-            text = { Text(Lang.t(Lang.Key.SHEET_REMOVE_CONFIRM, card.title)) },
+            text = { Text(Lang.t(Lang.Key.SHEET_REMOVE_CONFIRM, card.displayTitle)) },
             confirmButton = {
                 TextButton(onClick = {
                     confirmRemoval = false

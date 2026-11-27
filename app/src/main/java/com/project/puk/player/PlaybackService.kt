@@ -3,6 +3,7 @@ package com.project.puk.player
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import androidx.compose.runtime.snapshotFlow
 import androidx.media3.common.C
 import androidx.media3.common.ForwardingSimpleBasePlayer
 import androidx.media3.common.MediaMetadata
@@ -12,6 +13,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
@@ -23,6 +25,7 @@ import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.session.MediaSession
 import androidx.media3.session.MediaLibraryService
+import com.project.puk.core.Lang
 import com.project.puk.core.Log
 
 /**
@@ -77,8 +80,11 @@ class PlaybackService : MediaLibraryService() {
                 .distinctUntilChanged().collect { wrapped.refreshQueue() }
         }
         scope.launch {
-            puk.state.map { it.shuffle to it.sleepTimerMinutes }
-                .distinctUntilChanged().collect { mediaSession.setCustomLayout(callback.currentLayout()) }
+            combine(
+                puk.state.map { it.shuffle to it.sleepTimerMinutes }.distinctUntilChanged(),
+                snapshotFlow { Lang.current },
+            ) { _, _ -> callback.currentLayout() }
+                .collect { mediaSession.setCustomLayout(it) }
         }
         Log.i("Service", "media library session created")
     }

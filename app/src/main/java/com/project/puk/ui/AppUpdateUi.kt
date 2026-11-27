@@ -145,7 +145,12 @@ fun AppLangDialog() {
                 Lang.Code.entries.forEach { code ->
                     val selected = Lang.current == code
                     TextButton(onClick = {
+                        val previous = Lang.current
                         Lang.set(context, code)
+                        if (previous != code) {
+                            val playback = com.project.puk.player.PlaybackService.engine?.state?.value
+                            com.project.puk.player.PlaybackWidget.render(context, playback)
+                        }
                         AppLangUi.dismiss()
                     }) {
                         Text(if (selected) "✓ " + code.label else code.label)

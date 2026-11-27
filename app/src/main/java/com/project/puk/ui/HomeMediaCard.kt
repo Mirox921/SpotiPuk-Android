@@ -56,7 +56,7 @@ internal fun HomeRecommendationRow(card: Card, reason: String, onTrackActions: (
     Row(
         Modifier.fillMaxWidth()
             .then(if (actions == null) Modifier.clickable(onClick = onOpen)
-                else Modifier.contextGesture(card.title, onOpen, actions))
+                else Modifier.contextGesture(card.displayTitle, onOpen, actions))
             .padding(horizontal = 16.dp, vertical = 4.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -65,7 +65,7 @@ internal fun HomeRecommendationRow(card: Card, reason: String, onTrackActions: (
         Column(Modifier.weight(1f)) {
             if (reason.isNotBlank()) Text(reason, style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis)
-            Text(card.title, style = MaterialTheme.typography.titleSmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(card.displayTitle, style = MaterialTheme.typography.titleSmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
             if (card.subtitle.isNotBlank()) Text(card.subtitle, style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis)
         }

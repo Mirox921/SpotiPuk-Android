@@ -40,7 +40,9 @@ object Spotify {
         return Pathfinder.query(context, token, op, variables.toString())
     }
 
-    data class UserProfilePlaylist(val uri: String, val name: String, val imageUrl: String, val trackCount: Int)
+    data class UserProfilePlaylist(val uri: String, private val sourceName: String, val imageUrl: String, val trackCount: Int) {
+        val name: String get() = sourceName.ifBlank { Lang.t(Lang.Key.JAM_PLAYLIST) }
+    }
 
     /** Public playlists shown on the user's profile page. Empty on failure or a blank id. */
     suspend fun userPublicPlaylists(context: Context, userId: String): List<UserProfilePlaylist> {
@@ -71,7 +73,7 @@ object Spotify {
                 val uri = entry.optString("uri")
                 if (!uri.startsWith("spotify:playlist:")) return@mapNotNull null
                 val image = entry.optJSONArray("images")?.optJSONObject(0)?.optString("url").orEmpty()
-                val playlist = UserProfilePlaylist(uri, entry.optString("name").ifBlank { Lang.t(Lang.Key.JAM_PLAYLIST) }, image,
+                val playlist = UserProfilePlaylist(uri, entry.optString("name"), image,
                     entry.optJSONObject("tracks")?.optInt("total", 0) ?: 0)
                 Triple(uri, playlist, entry.opt("public") as? Boolean)
             }
@@ -103,7 +105,7 @@ object Spotify {
             val data = items.optJSONObject(index)?.optJSONObject("item")?.optJSONObject("data") ?: return@mapNotNull null
             val uri = data.optString("uri")
             if (!uri.startsWith("spotify:playlist:")) return@mapNotNull null
-            UserProfilePlaylist(uri, data.optString("name").ifBlank { Lang.t(Lang.Key.JAM_PLAYLIST) }, "", -1)
+            UserProfilePlaylist(uri, data.optString("name"), "", -1)
         }
         Log.i("Spotify", "profile playlists fallback visible=${rows.size}")
         // Hide playlists the last successful REST fetch recorded as private; unknown entries stay listed.
@@ -148,21 +150,14 @@ object Spotify {
         return HomeFeed(sections, parseHomeFacets(home.optJSONArray("homeChips")))
     }
 
-    private fun parseHomeFacets(chips: JSONArray?): List<HomeFacet> = buildList {
+    internal fun parseHomeFacets(chips: JSONArray?): List<HomeFacet> = buildList {
         if (chips == null) return@buildList
         for (index in 0 until chips.length()) {
             val chip = chips.optJSONObject(index) ?: continue
             val id = chip.optString("id").takeIf { it.isNotBlank() } ?: continue
             val label = homeSectionLabel(chip.opt("label")) ?: continue
-            val localized = when (label) {
-                "All" -> Lang.t(Lang.Key.HOME_FACET_ALL)
-                "Music" -> Lang.t(Lang.Key.HOME_FACET_MUSIC)
-                "Podcasts" -> Lang.t(Lang.Key.HOME_FACET_PODCASTS)
-                "Audiobooks" -> Lang.t(Lang.Key.HOME_FACET_AUDIOBOOKS)
-                else -> label
-            }
-            if (label == "All") continue
-            add(HomeFacet(id, localized, parseHomeFacets(chip.optJSONArray("subChips"))))
+            val facet = HomeFacet(id, label, parseHomeFacets(chip.optJSONArray("subChips")))
+            if (facet.labelKey != Lang.Key.HOME_FACET_ALL) add(facet)
         }
     }.distinctBy(HomeFacet::id)
 
@@ -185,7 +180,6 @@ object Spotify {
                 val title = homeSectionLabel(data.opt("title"))
                     ?: homeSectionLabel(data.opt("sectionTitle"))
                     ?: homeSectionLabel(section.opt("sectionTitle"))
-                    ?: Lang.t(Lang.Key.LIB_FOR_YOU)
                 val items = section.optJSONObject("sectionItems")?.optJSONArray("items")
                     ?: data.optJSONArray("items") ?: continue
                 val cards = buildList {
@@ -199,7 +193,7 @@ object Spotify {
                 }
                 if (cards.isNotEmpty()) {
                     val id = (section.opt("uri") as? String).orEmpty()
-                    add(Section(title, cards, sourceId = id, layout = layout))
+                    add(Section(title.orEmpty(), cards, sourceId = id, layout = layout, titleKey = Lang.Key.LIB_FOR_YOU.takeIf { title == null }))
                 }
             }
         }
@@ -457,7 +451,9 @@ object Spotify {
         return pfPost(context, operation, variables).mutationSucceeded(key)
     }
 
-    data class PlaylistChoice(val uri: String, val name: String, val containsTrack: Boolean)
+    data class PlaylistChoice(val uri: String, private val sourceName: String, val containsTrack: Boolean) {
+        val name: String get() = sourceName.ifBlank { Lang.t(Lang.Key.JAM_PLAYLIST) }
+    }
 
     private val playlistMetadataRetryAt = java.util.concurrent.ConcurrentHashMap<String, Long>()
 
@@ -593,7 +589,7 @@ object Spotify {
             val data = entry.optJSONObject("item")?.optJSONObject("data") ?: return@mapNotNull null
             val uri = data.optString("uri")
             if (!uri.startsWith("spotify:playlist:")) return@mapNotNull null
-            PlaylistChoice(uri, data.optString("name").ifBlank { Lang.t(Lang.Key.JAM_PLAYLIST) }, entry.optBoolean("curates"))
+            PlaylistChoice(uri, data.optString("name"), entry.optBoolean("curates"))
         }
         return Page(choices, nextPage(offset, items.length(), 50, page.optInt("totalCount", -1)))
     }
@@ -990,7 +986,7 @@ object Spotify {
         val links = buildList { if (linkItems != null) for (i in 0 until linkItems.length()) {
             val link = linkItems.optJSONObject(i) ?: continue
             val url = link.optString("url")
-            if (url.startsWith("https://")) add(link.optString("name").ifBlank { Lang.t(Lang.Key.API_ARTIST_LINK) } to url)
+            if (url.startsWith("https://")) add(link.optString("name") to url)
         } }
         return ArtistPage(
             name = profile?.optString("name").orEmpty(), imageUrl = coverOf(node),
@@ -1006,11 +1002,11 @@ object Spotify {
     }
 
     private fun artistShelves(content: JSONObject?): List<Section> = buildList {
-        for ((group, title) in listOf(
-            "featuringV2" to Lang.t(Lang.Key.API_FEATURING),
-            "appearsOn" to Lang.t(Lang.Key.API_APPEARS_ON),
-            "relatedArtists" to Lang.t(Lang.Key.API_RELATED_ARTISTS),
-            "discoveredOnV2" to Lang.t(Lang.Key.API_DISCOVERED_ON),
+        for ((group, titleKey) in listOf(
+            "featuringV2" to Lang.Key.API_FEATURING,
+            "appearsOn" to Lang.Key.API_APPEARS_ON,
+            "relatedArtists" to Lang.Key.API_RELATED_ARTISTS,
+            "discoveredOnV2" to Lang.Key.API_DISCOVERED_ON,
         )) {
             val items = content?.optJSONObject(group)?.optJSONArray("items") ?: continue
             val cards = buildList {
@@ -1021,7 +1017,7 @@ object Spotify {
                     cardFrom(entity.optJSONObject("data") ?: entity)?.let(::add)
                 }
             }.distinctBy(Card::uri)
-            if (cards.isNotEmpty()) add(Section(title, cards, group, HomeSectionLayout.SHELF))
+            if (cards.isNotEmpty()) add(Section("", cards, group, HomeSectionLayout.SHELF, titleKey))
         }
     }
 
@@ -1172,7 +1168,7 @@ object Spotify {
                     val name = item.optString("name").trim()
                     if (name.isEmpty()) continue
                     val role = item.optJSONObject("roleGroup")?.optString("name")
-                        ?.trim().orEmpty().ifBlank { Lang.t(Lang.Key.API_OTHERS) }
+                        ?.trim().orEmpty()
                     byRole.getOrPut(role) { mutableListOf() }.add(name)
                 }
                 byRole.forEach { (role, names) -> groups.add(CreditGroup(role, names.toList())) }
@@ -1445,8 +1441,8 @@ object Spotify {
         titled.sortBy { it.first }
         return spans.mapIndexed { index, (startMs, endMs) ->
             val title = titled.firstOrNull { (at, _) -> at >= startMs - 2000L && at <= startMs + 30_000L }
-                ?.second.orEmpty().ifBlank { Lang.t(Lang.Key.API_CHAPTER, (index + 1).toString()) }
-            ChapterSpan(title, startMs, endMs)
+                ?.second.orEmpty()
+            ChapterSpan(title, startMs, endMs, number = index + 1)
         }
     }
 

@@ -158,7 +158,7 @@ internal fun TrackDetailsSheet(item: PukPlayer.QueueItem, onDismiss: () -> Unit)
         }
         credits?.let { loaded ->
             loaded.groups.forEach { group ->
-                DetailField(group.role, group.names.joinToString(", "))
+                DetailField(group.displayRole, group.names.joinToString(", "))
             }
             if (loaded.sourceNames.isNotEmpty()) {
                 DetailField(Lang.t(Lang.Key.NP_DATA_SOURCE), loaded.sourceNames.joinToString(", "))

@@ -52,6 +52,7 @@ class PlaybackWidget : AppWidgetProvider() {
                 setTextViewText(R.id.widget_artist, track?.artist.orEmpty())
                 setImageViewResource(R.id.widget_play, if (playing) android.R.drawable.ic_media_pause else android.R.drawable.ic_media_play)
                 setContentDescription(R.id.widget_play, if (playing) Lang.t(Lang.Key.JAM_PAUSE) else Lang.t(Lang.Key.JAM_PLAY))
+                setContentDescription(R.id.widget_next, Lang.t(Lang.Key.JAM_NEXT_TRACK))
                 setOnClickPendingIntent(R.id.widget_open, open)
                 setOnClickPendingIntent(R.id.widget_play, if (track == null) open else action(toggle))
                 setOnClickPendingIntent(R.id.widget_next, if (track == null) open else action(next))

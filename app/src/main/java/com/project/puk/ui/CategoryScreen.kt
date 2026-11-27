@@ -72,8 +72,9 @@ internal fun CategoryScreen(
     onTrackActions: (TrackRow) -> Unit,
 ) {
     val context = LocalContext.current
-    val editorial = remember(context) { EditorialCatalogProvider(context.applicationContext) }
-    val home = remember(homeSections) { HomeCatalogProvider(homeSections.orEmpty()) }
+    val language = Lang.current
+    val editorial = remember(context, language) { EditorialCatalogProvider(context.applicationContext) }
+    val home = remember(homeSections, language) { HomeCatalogProvider(homeSections.orEmpty()) }
     val relevantHistory = if (id == "recent") recentTracks else emptyList()
     val repository = remember(editorial, home, relevantHistory) {
         CatalogRepository(home, RecentCatalogProvider(relevantHistory), editorial)
@@ -143,7 +144,7 @@ internal fun CategoryScreen(
         }
         sections.forEach { section ->
             item {
-                Text(section.title, Modifier.padding(horizontal = 16.dp), style = MaterialTheme.typography.titleLarge)
+                Text(section.displayTitle, Modifier.padding(horizontal = 16.dp), style = MaterialTheme.typography.titleLarge)
             }
             val tracks = section.items.filter { it.kind == "track" }.map {
                 TrackRow(it.uri, it.uri.substringAfterLast(':'), it.title, it.subtitle, "", "", it.imageUrl, 0)

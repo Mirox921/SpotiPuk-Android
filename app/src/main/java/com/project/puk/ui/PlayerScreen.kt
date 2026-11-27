@@ -526,7 +526,7 @@ fun PlayerScreen(
                 if (state.error != null && item != null) {
                     val message = when {
                         state.waitingForLicenseRetry -> Lang.t(Lang.Key.PLAYER_LICENSE_RETRY_QUEUED)
-                        state.error == PukPlayer.LICENSE_NETWORK_REQUIRED -> PukPlayer.LICENSE_NETWORK_REQUIRED
+                        state.error == PukPlayer.LICENSE_NETWORK_REQUIRED -> Lang.t(Lang.Key.PUK_LICENSE_NETWORK)
                         state.error == PukPlayer.LICENSE_RATE_LIMITED -> Lang.t(Lang.Key.PLAYER_LICENSE_RATE_LIMITED)
                         state.positionMs > 0 -> Lang.t(Lang.Key.PLAYER_PLAYBACK_INTERRUPTED)
                         else -> Lang.t(Lang.Key.PLAYER_TRACK_START_FAILED)

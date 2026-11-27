@@ -208,7 +208,7 @@ class JamController(
                     emptyMap(),
                     "jam-create",
                 )
-            } ?: error("Server unreachable")
+            } ?: throw JamJoinException("server_unavailable")
             val body = JSONObject(response.body)
             if (response.code != 200) error(body.optString("message", "create failed"))
             startJoined(body)
@@ -229,11 +229,11 @@ class JamController(
                 emptyMap(),
                 "jam-join",
             )
-        } ?: error(Lang.t(Lang.Key.JAM_SERVER_UNAVAILABLE))
+        } ?: throw JamJoinException("server_unavailable")
         val body = JSONObject(response.body)
         // Истёкшее/отозванное/несуществующее приглашение — понятный текст
         // вместо сырого кода (см. jamJoinErrorMessage).
-        if (response.code != 200) error(jamJoinErrorMessage(body.optString("error"), body.optString("message")))
+        if (response.code != 200) throw JamJoinException(body.optString("error"), body.optString("message"))
         startJoined(body)
         Unit
     }

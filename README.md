@@ -28,6 +28,12 @@
   <a href="#build-from-source">Build from source</a>
 </p>
 
+## From SpotiPuk 1.x to 2.0
+
+SpotiPuk 2.0 rebuilds the original web-player companion as a native Android app. It brings the Ember interface, Media3 playback with a persistent queue, music and podcast discovery, Spotify Connect, and shared listening with Jam.
+
+The predecessor and its release history are available in the [original SpotiPuk 1.x repository](https://github.com/Mirox921/SpotiPuk).
+
 ## Screenshots
 
 <table align="center">

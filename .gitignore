@@ -1,0 +1,37 @@
+# Android and Gradle
+.gradle/
+.kotlin/
+**/build/
+.cxx/
+.externalNativeBuild/
+local.properties
+captures/
+
+# IDE and OS
+.idea/
+.vscode/
+*.iml
+.DS_Store
+Thumbs.db
+
+# Local configuration and signing
+.env
+.env.*
+secrets.properties
+signing.properties
+*release.properties
+*.jks
+*.keystore
+*.p12
+*.pfx
+*.pem
+*.key
+
+# Build outputs and logs
+*.apk
+*.aab
+*.dex
+*.class
+*.log
+*.jar
+!/gradle/wrapper/gradle-wrapper.jar

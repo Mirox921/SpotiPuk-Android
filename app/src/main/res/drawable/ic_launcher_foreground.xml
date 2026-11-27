@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:aapt="http://schemas.android.com/aapt"
+        android:width="108dp" android:height="108dp"
+        android:viewportWidth="108" android:viewportHeight="108">
+ <!-- Small vector-only glow on all APIs; no raster filtering. -->
+<group android:translateX="1.034" android:translateY="1.636">
+ <path android:fillColor="#0FF36A0D" android:pathData="M 86.813,52.364 A 33.847,34.364 0 1,0 19.120,52.364 A 33.847,34.364 0 1,0 86.813,52.364 Z"/>
+ <path android:fillColor="#17FF6908" android:pathData="M 85.694,52.364 A 32.727,33.244 0 1,0 20.239,52.364 A 32.727,33.244 0 1,0 85.694,52.364 Z"/>
+ <path android:pathData="M 84.402,52.364 A 31.435,31.952 0 1,0 21.531,52.364 A 31.435,31.952 0 1,0 84.402,52.364 Z">
+   <aapt:attr name="android:fillColor">
+     <gradient xmlns:android="http://schemas.android.com/apk/res/android"
+       android:type="linear" android:startX="29" android:startY="18" android:endX="68" android:endY="89">
+       <item android:offset="0.0" android:color="#FFFFCF19"/>
+       <item android:offset="0.27" android:color="#FFFFB20A"/>
+       <item android:offset="0.55" android:color="#FFFF8300"/>
+       <item android:offset="0.8" android:color="#FFF65C00"/>
+       <item android:offset="1.0" android:color="#FFEE390B"/>
+     </gradient>
+   </aapt:attr>
+ </path>
+ <path android:fillColor="#FF101018" android:pathData="M 37.464,43.234 L 37.464,43.234 Q 40.995,43.234 40.995,46.766 L 40.995,58.392 Q 40.995,61.923 37.464,61.923 L 37.464,61.923 Q 33.933,61.923 33.933,58.392 L 33.933,46.766 Q 33.933,43.234 37.464,43.234 Z"/>
+ <path android:fillColor="#FF101018" android:pathData="M 47.498,35.656 L 47.498,35.656 Q 51.072,35.656 51.072,39.230 L 51.072,65.411 Q 51.072,68.986 47.498,68.986 L 47.498,68.986 Q 43.923,68.986 43.923,65.411 L 43.923,39.230 Q 43.923,35.656 47.498,35.656 Z"/>
+ <path android:fillColor="#FF101018" android:pathData="M 57.876,28.249 L 57.876,28.249 Q 61.407,28.249 61.407,31.780 L 61.407,71.742 Q 61.407,75.273 57.876,75.273 L 57.876,75.273 Q 54.344,75.273 54.344,71.742 L 54.344,31.780 Q 54.344,28.249 57.876,28.249 Z"/>
+ <path android:fillColor="#FF101018" android:pathData="M 67.909,39.876 L 67.909,39.876 Q 71.483,39.876 71.483,43.450 L 71.483,61.278 Q 71.483,64.852 67.909,64.852 L 67.909,64.852 Q 64.335,64.852 64.335,61.278 L 64.335,43.450 Q 64.335,39.876 67.909,39.876 Z"/>
+</group>
+</vector>

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Brand Colors (Orange & Black) -->
+    <color name="spotify_orange">#FF6A00</color>
+    <color name="spotify_black">#FF000000</color>
+    <color name="spotify_white">#FFFFFFFF</color>
+    <color name="spotify_dark_gray">#FF121212</color>
+    <color name="spotify_medium_gray">#FF282828</color>
+    <color name="spotify_light_gray">#FFB3B3B3</color>
+
+    <!-- Material 3 Primary Colors -->
+    <color name="primary">#FF9654</color>
+    <color name="on_primary">#17181D</color>
+    <color name="primary_container">#58321F</color>
+    <color name="on_primary_container">#F7F5F2</color>
+
+    <!-- Material 3 Surface Colors -->
+    <color name="surface">#1B1D23</color>
+    <color name="on_surface">#F7F5F2</color>
+    <color name="surface_variant">#373A43</color>
+    <color name="on_surface_variant">#C5C3CC</color>
+
+    <!-- Material 3 Background -->
+    <color name="background">#101116</color>
+    <color name="on_background">#F7F5F2</color>
+
+    <!-- Material 3 Status Bar -->
+    <color name="status_bar">#101116</color>
+</resources>

@@ -1,6 +1,7 @@
 package com.project.puk.ui
 
 import com.project.puk.core.Lang
+import androidx.compose.ui.res.painterResource
 
 import kotlinx.coroutines.flow.map
 import androidx.compose.runtime.collectAsState
@@ -770,8 +771,8 @@ internal fun PlaylistScreen(route: ContentRoute, uri: String, player: com.projec
                 editedRow = null
                 onTrackActions(row)
             }
-            if (move && row.playlistIndex > 0) SheetAction(com.project.puk.R.drawable.ember_ctx_sort, Lang.t(Lang.Key.JAM_MOVE_UP), enabled = !editing) { edit(row, -1) }
-            if (move && row.playlistIndex < (pages.total ?: pages.items.size) - 1) SheetAction(com.project.puk.R.drawable.ember_ctx_sort, Lang.t(Lang.Key.JAM_MOVE_DOWN), enabled = !editing) { edit(row, 1) }
+            if (move && row.playlistIndex > 0) SheetAction(EmberIcons.MoveUp, Lang.t(Lang.Key.JAM_MOVE_UP), enabled = !editing) { edit(row, -1) }
+            if (move && row.playlistIndex < (pages.total ?: pages.items.size) - 1) SheetAction(EmberIcons.MoveDown, Lang.t(Lang.Key.JAM_MOVE_DOWN), enabled = !editing) { edit(row, 1) }
             SheetAction(com.project.puk.R.drawable.ember_ctx_delete_playlist, Lang.t(Lang.Key.LIB_REMOVE_FROM_PLAYLIST), enabled = !editing) { edit(row, 0) }
             if (editError) TextButtonLite(Lang.t(Lang.Key.LIB_CHANGE_UNCONFIRMED_REFRESH)) {
                 editedRow = null
@@ -779,11 +780,18 @@ internal fun PlaylistScreen(route: ContentRoute, uri: String, player: com.projec
             }
         }
     }
-    if (showSort) EmberActionSheet(onDismissRequest = { showSort = false }, heading = Lang.t(Lang.Key.LIB_SORT_BY), text = {
+    if (showSort) EmberActionSheet(
+        onDismissRequest = { showSort = false },
+        heading = Lang.t(Lang.Key.LIB_SORT_BY),
+        headingIcon = painterResource(com.project.puk.R.drawable.ember_ctx_sort),
+    ) {
         PlaylistSort.entries.filter { it != PlaylistSort.ADDED || pages.items.any { row -> row.addedAt.isNotBlank() } }.forEach { order ->
-            SheetAction(com.project.puk.R.drawable.ember_ctx_sort, (if (route.playlistSort == order) "✓ " else "") + order.label) { route.playlistSort = order; showSort = false }
+            EmberSheetChoice(order.label, selected = route.playlistSort == order) {
+                route.playlistSort = order
+                showSort = false
+            }
         }
-    })
+    }
 }
 
 @Composable
@@ -909,10 +917,14 @@ internal fun LikedScreen(
     )
     if (showActions) EmberActionSheet(onDismissRequest = { showActions = false }, heading = Lang.t(Lang.Key.JAM_LIKED_TRACKS), text = {
         PlaylistSort.entries.filter { it != PlaylistSort.ADDED || pages.items.any { row -> row.addedAt.isNotBlank() } }.forEach { order ->
-            SheetAction(
-                com.project.puk.R.drawable.ember_ctx_sort,
-                (if (route.playlistSort == order) "✓ " else "") + order.label,
-            ) {
+            val icon = when (order) {
+                PlaylistSort.CUSTOM -> EmberIcons.SortManual
+                PlaylistSort.TITLE -> EmberIcons.SortTitle
+                PlaylistSort.ARTIST -> EmberIcons.Person
+                PlaylistSort.ALBUM -> EmberIcons.Album
+                PlaylistSort.ADDED -> EmberIcons.SortAdded
+            }
+            EmberSheetChoice(order.label, selected = route.playlistSort == order, icon = icon) {
                 route.playlistSort = order
                 showActions = false
             }
@@ -932,7 +944,7 @@ internal fun LikedScreen(
             context.startActivity(android.content.Intent.createChooser(send, Lang.t(Lang.Key.JAM_SHARE)))
             showActions = false
         }
-        SheetAction(com.project.puk.R.drawable.ember_ctx_select_item, Lang.t(Lang.Key.LIB_REFRESH_LIST)) {
+        SheetAction(EmberIcons.Refresh, Lang.t(Lang.Key.LIB_REFRESH_LIST)) {
             showActions = false
             route.tracks = PagedList()
         }

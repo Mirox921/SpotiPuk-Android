@@ -17,7 +17,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.GridView
 import androidx.compose.material.icons.outlined.ViewList
-import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -133,7 +132,7 @@ internal fun LibraryBrowser(pages: PagedList<Card>, searchPages: android.util.Lr
             item {
                 Row(Modifier.fillMaxWidth().padding(horizontal = 8.dp), verticalAlignment = Alignment.CenterVertically) {
                     TextButton(onClick = { sortMenu = true }, modifier = Modifier.weight(1f)) { Icon(painterResource(R.drawable.ember_ctx_sort), null, Modifier.size(20.dp)); Spacer(Modifier.width(8.dp)); Text(orderChoices.first { it.first == order }.second, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) }
-                    IconButton(onClick = onRefresh) { Icon(Icons.Outlined.Refresh, Lang.t(Lang.Key.LIB_REFRESH_LIBRARY)) }
+                    IconButton(onClick = onRefresh) { Icon(EmberIcons.Refresh, Lang.t(Lang.Key.LIB_REFRESH_LIBRARY)) }
                     IconButton(onClick = { grid = !grid }) { Icon(if (grid) Icons.Outlined.ViewList else Icons.Outlined.GridView, if (grid) Lang.t(Lang.Key.LIB_SHOW_LIST) else Lang.t(Lang.Key.LIB_SHOW_GRID)) }
                 }
                 serverError?.let { Text(it, Modifier.padding(16.dp), color = MaterialTheme.colorScheme.error) }
@@ -190,14 +189,18 @@ internal fun LibraryBrowser(pages: PagedList<Card>, searchPages: android.util.Lr
             }
         }
     }
-    if (sortMenu) EmberActionSheet(onDismissRequest = { sortMenu = false }, heading = Lang.t(Lang.Key.LIB_SORT_LIBRARY), text = {
+    if (sortMenu) EmberActionSheet(
+        onDismissRequest = { sortMenu = false },
+        heading = Lang.t(Lang.Key.LIB_SORT_LIBRARY),
+        headingIcon = painterResource(R.drawable.ember_ctx_sort),
+    ) {
         orderChoices.forEach { (id, label) ->
-            SheetAction(R.drawable.ember_ctx_sort, (if (order == id) "✓ " else "") + label) {
+            EmberSheetChoice(label, selected = order == id) {
                 order = id
                 sortMenu = false
             }
         }
-    })
+    }
     if (create) EmberActionSheet(onDismissRequest = { create = false }, heading = Lang.t(Lang.Key.LIB_CREATE), text = {
         SheetAction(R.drawable.ember_ctx_create_playlist, Lang.t(Lang.Key.LIB_SPOTIFY_PLAYLIST)) { create = false; onCreatePlaylist(serverFolder) }
         SheetAction(R.drawable.ember_ctx_folder, Lang.t(Lang.Key.LIB_SPOTIFY_FOLDER)) { create = false; folderCommand = ServerFolderCommand(null) }

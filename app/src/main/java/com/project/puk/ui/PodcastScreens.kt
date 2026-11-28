@@ -603,7 +603,7 @@ internal fun EpisodeActionSheet(
             // Full-width action rows stay readable with larger accessibility fonts.
             Column(Modifier.fillMaxWidth()) {
                 SheetAction(
-                    iconRes = if (saved == true) R.drawable.ember_ctx_remove_episode else R.drawable.ember_ctx_save_episode,
+                    icon = if (saved == true) EmberIcons.Bookmark else EmberIcons.BookmarkBorder,
                     label = if (saving) "…" else if (saved == true) Lang.t(Lang.Key.POD_IN_LIBRARY) else Lang.t(Lang.Key.LIB_SAVE),
                     enabled = saved != null && !saving,
                     onClick = {

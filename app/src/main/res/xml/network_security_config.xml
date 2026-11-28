@@ -1,9 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Allow local development connections on loopback. -->
+<!-- Jam dev-mode: cleartext only for the explicitly configured local/dev
+     Jam hosts; every other destination keeps the no-cleartext default
+     (owner correction #5). The production deployment switches to HTTPS
+     behind a reverse proxy and removes these entries. -->
 <network-security-config>
     <base-config cleartextTrafficPermitted="false" />
     <domain-config cleartextTrafficPermitted="true">
         <domain includeSubdomains="false">127.0.0.1</domain>
         <domain includeSubdomains="false">localhost</domain>
+        <domain includeSubdomains="false">92.5.76.62</domain>
+        <domain includeSubdomains="false">bore.pub</domain>
     </domain-config>
 </network-security-config>

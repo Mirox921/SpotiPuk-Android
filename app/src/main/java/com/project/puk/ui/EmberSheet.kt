@@ -6,15 +6,20 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetValue
@@ -26,7 +31,9 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import com.project.puk.ui.theme.EmberIconButton
 import com.project.puk.ui.theme.EmberIcons
@@ -60,11 +67,20 @@ internal fun EmberActionSheet(
     scrollBody: Boolean = true,
     dismissButton: (@Composable () -> Unit)? = null,
     confirmButton: (@Composable () -> Unit)? = null,
+    headingIcon: Painter? = null,
     text: @Composable ColumnScope.() -> Unit,
 ) {
     EmberSheet(onDismissRequest, dismissEnabled) {
         Column(Modifier.fillMaxWidth().padding(start = 20.dp, end = 20.dp, bottom = 16.dp)) {
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                if (headingIcon != null) {
+                    Icon(
+                        headingIcon,
+                        contentDescription = null,
+                        modifier = Modifier.padding(end = 12.dp).size(24.dp),
+                        tint = MaterialTheme.colorScheme.primary,
+                    )
+                }
                 Text(heading, Modifier.weight(1f), style = MaterialTheme.typography.headlineSmall)
                 EmberIconButton(EmberIcons.Close, Lang.t(Lang.Key.SHEET_CLOSE_PANEL), onDismissRequest, enabled = dismissEnabled)
             }
@@ -108,4 +124,25 @@ internal fun EmberSheetCard(icon: ImageVector, title: String, detail: String, on
             }
         }
     }
+}
+
+@Composable
+internal fun EmberSheetChoice(
+    label: String,
+    selected: Boolean,
+    icon: ImageVector? = null,
+    onClick: () -> Unit,
+) {
+    ListItem(
+        headlineContent = { Text(label) },
+        leadingContent = if (icon != null) {
+            { Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(24.dp)) }
+        } else null,
+        trailingContent = {
+            if (selected) Icon(EmberIcons.Check, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+            else Spacer(Modifier.size(24.dp))
+        },
+        modifier = Modifier.selectable(selected = selected, role = Role.RadioButton, onClick = onClick),
+        colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+    )
 }

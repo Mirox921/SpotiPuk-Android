@@ -15,8 +15,8 @@ android {
         applicationId = "com.project.puk"
         minSdk = 28
         targetSdk = 35
-        versionCode = 16
-        versionName = "2.0.0-beta1"
+        versionCode = 18
+        versionName = "2.0.0-beta3"
     }
 
     buildFeatures {
@@ -35,8 +35,16 @@ android {
     }
 
     signingConfigs {
-        getByName("debug") {
-            System.getenv("SPOTIPUK_DEBUG_KEYSTORE")?.let { storeFile = file(it) }
+        // Debug key (fingerprint 56:46:C7… — lives OUTSIDE the repo, in
+        // user.home/.android/debug.keystore; matches the first assetlinks entry).
+        create("debugKey") {
+            storeFile = file(
+                System.getenv("SPOTIPUK_DEBUG_KEYSTORE")
+                    ?: (System.getProperty("user.home") + "/.android/debug.keystore"),
+            )
+            storePassword = "android"
+            keyAlias = "androiddebugkey"
+            keyPassword = "android"
         }
         create("releaseKey") {
             storeFile = releaseProps.getProperty("storeFile")?.let { file(it) }
@@ -47,19 +55,26 @@ android {
     }
 
     defaultConfig {
-        // Public HTTPS endpoint for Jam sessions and Android App Links.
+        // Jam backend; overridable in Settings. Dev: local server on LAN.
+        // JAM_INVITE_ORIGIN — публичное HTTPS-приглашение (App Links);
+        // JAM_SERVER_URL идёт через Caddy TLS (docs/JAM_DEPLOYMENT.md),
+        // dev-IP 92.5.76.62:8080 остаётся в network_security_config для локальных проверок.
         buildConfigField("String", "JAM_SERVER_URL", "\"https://jam.spotipuk.stream\"")
         buildConfigField("String", "JAM_INVITE_ORIGIN", "\"https://jam.spotipuk.stream\"")
         buildConfigField("boolean", "JAM_DEV_ALLOW_HTTP", "true")
     }
 
     buildTypes {
+        // Deterministic debug signing (AGP default would vary with HOME/XDG).
+        debug {
+            signingConfig = signingConfigs.getByName("debugKey")
+        }
         release {
             signingConfig = if (releaseProps.getProperty("storeFile") != null) {
                 signingConfigs.getByName("releaseKey")
             } else {
                 // Local fallback; a debug-signed release must not be distributed.
-                signingConfigs.getByName("debug")
+                signingConfigs.getByName("debugKey")
             }
             // R8 + resource shrink: 82 MB debug → small release (Quackify-style).
             // Debug builds stay unminified (fast iterate, x86 emulator ABI intact).

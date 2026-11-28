@@ -126,6 +126,39 @@ internal object EmberIcons {
         "M12 20 C10.9 19 3 14.4 3 8.9 C3 4.4 8.6 3.2 12 7 C15.4 3.2 21 4.4 21 8.9 C21 14.4 13.1 19 12 20 Z",
         "M12 20 C10.9 19 3 14.4 3 8.9 C3 4.4 8.6 3.2 12 7 C15.4 3.2 21 4.4 21 8.9 C21 14.4 13.1 19 12 20 Z",
     )
+    private const val BookmarkPath = "M7.5 4 H16.5 Q18.5 4 18.5 6 V20 L12 16 L5.5 20 V6 Q5.5 4 7.5 4 Z"
+    val BookmarkBorder = vector("BookmarkBorder", BookmarkPath)
+    val Bookmark = vector("Bookmark", BookmarkPath, BookmarkPath)
+    val Transcript = vector(
+        "Transcript",
+        "M7.5 3.5 H16.5 Q19 3.5 19 6 V18 Q19 20.5 16.5 20.5 H7.5 Q5 20.5 5 18 V6 Q5 3.5 7.5 3.5 Z M8.5 8 H15.5 M8.5 12 H15.5 M8.5 16 H13.5",
+    )
+    val PlaybackSpeed = vector(
+        "PlaybackSpeed",
+        "M5.5 18 A8.5 8.5 0 1 1 18.5 18 M12 14 L16 10 M9 19 H15",
+    )
+    val Refresh = vector(
+        "Refresh",
+        "M19.5 10 A7.7 7.7 0 1 0 19 15.5 M19.5 5.5 V10 H15",
+    )
+    val SortManual = vector(
+        "SortManual",
+        "M9 6 H20 M9 12 H20 M9 18 H20",
+        "M5 6 A1 1 0 1 0 3 6 A1 1 0 1 0 5 6 Z M5 12 A1 1 0 1 0 3 12 A1 1 0 1 0 5 12 Z M5 18 A1 1 0 1 0 3 18 A1 1 0 1 0 5 18 Z",
+    )
+    val SortTitle = vector(
+        "SortTitle",
+        "M4 6 H13 M8.5 6 V18 M6 18 H11 M16 10 H20 M16 14 H20 M16 18 H20",
+    )
+    val SortAdded = vector(
+        "SortAdded",
+        "M8 3 V7 M16 3 V7 M4 10 H20 M6 5 H18 Q20 5 20 7 V18 Q20 20 18 20 H6 Q4 20 4 18 V7 Q4 5 6 5 Z M10 15 H14",
+    )
+    private const val LibraryActionShelf = "M4 5 H7.5 V19 H4 Z M11 5 H14.5 V10 M11 5 V19 H12"
+    val LibraryAdd = vector("LibraryAdd", "$LibraryActionShelf M18 13 V20 M14.5 16.5 H21.5")
+    val LibraryRemove = vector("LibraryRemove", "$LibraryActionShelf M14.5 16.5 H21.5")
+    val MoveUp = vector("MoveUp", "M12 19 V5 M6.5 10.5 L12 5 L17.5 10.5")
+    val MoveDown = vector("MoveDown", "M12 5 V19 M6.5 13.5 L12 19 L17.5 13.5")
     val FormatListNumbered = vector(
         "FormatListNumbered",
         "M4 5 H20 M4 12 H16 M4 19 H12 M17 16 L21 19 L17 22 Z",

@@ -23,15 +23,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.project.puk.R
 import com.project.puk.api.Card
 import com.project.puk.api.Spotify
 import com.project.puk.api.TrackRow
-import kotlinx.coroutines.launch
 import com.project.puk.ui.theme.EmberIcons
+import kotlinx.coroutines.launch
 
 internal val LocalContextPlayCollection =
     staticCompositionLocalOf<((String, List<TrackRow>) -> Unit)?> { null }
@@ -163,7 +165,7 @@ internal fun cardActions(
                     ShowPlaybackActions(card, onStarted = { visible = false })
                 }
                 if (jamAddCollection != null && card.kind == "playlist") {
-                    SheetAction(R.drawable.ember_ctx_add_to_playlist, Lang.t(Lang.Key.SHEET_ADD_PLAYLIST_TO_JAM)) {
+                    SheetAction(EmberIcons.Groups, Lang.t(Lang.Key.SHEET_ADD_PLAYLIST_TO_JAM)) {
                         jamAddCollection(card.uri, emptyList())
                         visible = false
                     }
@@ -227,12 +229,12 @@ internal fun CardLibraryAction(card: Card, inLibrary: Boolean, onChanged: () -> 
         }
     }
     SheetAction(
-        when (card.kind) {
-            "show", "podcast" -> if (current) R.drawable.ember_ctx_podcast_show_remove else R.drawable.ember_ctx_podcast_show_save
-            "audiobook" -> if (current) R.drawable.ember_ctx_audiobook_remove else R.drawable.ember_ctx_audiobook_save
-            "artist" -> if (current) R.drawable.ember_ctx_unfollow_artist else R.drawable.ember_ctx_follow_artist
-            "playlist" -> if (current) R.drawable.ember_ctx_remove_playlist_library else R.drawable.ember_ctx_save_playlist
-            else -> if (current) R.drawable.ember_ctx_remove_album else R.drawable.ember_ctx_save_album
+        when {
+            card.kind == "artist" -> ImageVector.vectorResource(
+                if (current) R.drawable.ember_ctx_unfollow_artist else R.drawable.ember_ctx_follow_artist,
+            )
+            current -> EmberIcons.LibraryRemove
+            else -> EmberIcons.LibraryAdd
         },
         if (updating) Lang.t(Lang.Key.SHEET_SAVING_CHANGES) else label,
         enabled = !updating && saved != null,
@@ -309,7 +311,7 @@ private fun CardPlaybackActions(
     ) { start(CardPlaybackAction.Play) }
     if (onEnqueue != null || loading == CardPlaybackAction.Enqueue) {
         SheetAction(
-            R.drawable.ember_ctx_queue_collection,
+            R.drawable.ember_ctx_add_to_queue,
             if (loading == CardPlaybackAction.Enqueue) Lang.t(Lang.Key.SHEET_LOADING_TRACKS) else Lang.t(Lang.Key.SHEET_ADD_TO_QUEUE),
             enabled = loading == null,
         ) { start(CardPlaybackAction.Enqueue) }

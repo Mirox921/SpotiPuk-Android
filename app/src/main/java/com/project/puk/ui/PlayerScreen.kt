@@ -197,7 +197,9 @@ fun PlayerScreen(
     var shuffleMenu by remember { mutableStateOf(false) }
     var chaptersSheet by remember(uri) { mutableStateOf(false) }
     var transcriptSheet by remember(uri) { mutableStateOf(false) }
-    if (transcriptSheet) EpisodeTranscriptSheet(uri, playback, { player.seekTo(it) }) { transcriptSheet = false }
+    if (transcriptSheet) {
+        EpisodeTranscriptSheet(uri, item?.title.orEmpty(), playback, player::seekTo) { transcriptSheet = false }
+    }
     var qualityMenu by remember(uri) { mutableStateOf(false) }
     var videoOverlay by rememberSaveable(uri) { mutableStateOf(false) }
     BackHandler(qualityMenu) { qualityMenu = false }
@@ -521,7 +523,7 @@ fun PlayerScreen(
                             color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1,
                             overflow = TextOverflow.Ellipsis)
                     }
-                    TrackHeart(uri, onLibraryChanged)
+                    SaveMediaButton(uri, onLibraryChanged)
                 }
                 if (state.error != null && item != null) {
                     val message = when {
@@ -572,16 +574,18 @@ fun PlayerScreen(
                                 Text(speedLabel(state.speed), style = MaterialTheme.typography.labelLarge)
                                 DropdownMenu(expanded = speedMenu, onDismissRequest = { speedMenu = false }) {
                                     DropdownMenuItem(
-                                        text = { Text(Lang.t(Lang.Key.PLAYER_PLAYBACK_SPEED)) }, enabled = false,
-                                        leadingIcon = { Icon(painterResource(R.drawable.ember_ctx_playback_speed), null, Modifier.size(24.dp)) },
+                                        text = { Text(Lang.t(Lang.Key.PLAYER_PLAYBACK_SPEED)) },
+                                        leadingIcon = { Icon(EmberIcons.PlaybackSpeed, contentDescription = null, tint = palette.primary) },
+                                        enabled = false,
                                         onClick = {},
                                     )
                                     listOf(0.5f, 0.75f, 1f, 1.25f, 1.5f, 1.75f, 2f).forEach { speed ->
                                         DropdownMenuItem(
                                             text = { Text(speedLabel(speed)) },
-                                            leadingIcon = { Icon(painterResource(R.drawable.ember_ctx_playback_speed), null, Modifier.size(24.dp)) },
+                                            modifier = Modifier.semantics { selected = state.speed == speed },
                                             trailingIcon = {
-                                                if (state.speed == speed) Icon(EmberIcons.Check, Lang.t(Lang.Key.JAM_SELECTED), tint = palette.primary)
+                                                if (state.speed == speed) Icon(EmberIcons.Check, contentDescription = null, tint = palette.primary)
+                                                else Spacer(Modifier.size(24.dp))
                                             },
                                             onClick = { player.setSpeed(speed); speedMenu = false },
                                         )
@@ -749,7 +753,7 @@ fun PlayerScreen(
                     }
                     if (isEpisode) {
                         IconButton(onClick = { transcriptSheet = true }) {
-                            Icon(painterResource(R.drawable.ember_ctx_chapter_copy_timestamp), Lang.t(Lang.Key.PLAYER_TRANSCRIPT), Modifier.size(24.dp))
+                            Icon(EmberIcons.Transcript, Lang.t(Lang.Key.PLAYER_TRANSCRIPT), Modifier.size(24.dp))
                         }
                     }
                     IconButton(onClick = { queueScroll = LazyListState((state.index - 1).coerceAtLeast(0)) }) {
@@ -849,7 +853,7 @@ fun PlayerScreen(
                         Text(item.artist, style = MaterialTheme.typography.bodySmall, color = palette.onSurfaceVariant,
                             maxLines = 1, overflow = TextOverflow.Ellipsis)
                     }
-                    TrackHeart(item.uri, onLibraryChanged)
+                    SaveMediaButton(item.uri, onLibraryChanged)
                     IconButton(onClick = player::togglePlayPause) {
                         Icon(
                             if (state.playing) EmberIcons.Pause else EmberIcons.PlayArrow,
@@ -986,11 +990,12 @@ internal fun SleepTimerDialog(activeMinutes: Int?, onChange: (Int?) -> Unit, onD
     EmberActionSheet(
         onDismissRequest = onDismiss,
         heading = Lang.t(Lang.Key.PLAYER_SLEEP_TIMER),
+        headingIcon = painterResource(R.drawable.ember_ctx_sleep_timer),
         text = {
             Column {
                 activeMinutes?.let { Text(Lang.t(Lang.Key.PLAYER_TIMER_SET, it)) }
                 listOf(15, 30, 60).forEach { minutes ->
-                    SheetAction(R.drawable.ember_ctx_sleep_timer, "$minutes " + Lang.t(Lang.Key.SLEEP_TIMER_MIN)) {
+                    EmberSheetChoice("$minutes " + Lang.t(Lang.Key.SLEEP_TIMER_MIN), selected = activeMinutes == minutes) {
                         onChange(minutes)
                         onDismiss()
                     }
@@ -1184,7 +1189,8 @@ private fun QueueDialog(
                         Text(Lang.t(Lang.Key.PLAYER_QUEUE), Modifier.padding(8.dp), style = MaterialTheme.typography.headlineSmall)
                         onClear?.let { clear ->
                             TextButton(onClick = clear) {
-                                Icon(painterResource(R.drawable.ember_ctx_clear_queue), null, Modifier.size(24.dp))
+                                Icon(painterResource(R.drawable.ember_ctx_clear_queue), null, Modifier.size(20.dp))
+                                Spacer(Modifier.width(10.dp))
                                 Text(Lang.t(Lang.Key.PLAYER_CLEAR_UP_NEXT))
                             }
                         }
@@ -1192,7 +1198,8 @@ private fun QueueDialog(
                             TextButton(onClick = {
                                 scope.launch { queueScroll.scrollToItem(state.index.coerceAtLeast(0)) }
                             }) {
-                                Icon(painterResource(R.drawable.ember_ctx_jump_to_current), null, Modifier.size(24.dp))
+                                Icon(painterResource(R.drawable.ember_ctx_jump_to_current), null, Modifier.size(20.dp))
+                                Spacer(Modifier.width(10.dp))
                                 Text(Lang.t(Lang.Key.PLAYER_JUMP_TO_CURRENT))
                             }
                         }
@@ -1383,7 +1390,7 @@ fun MiniPlayer(
         ) {
             MiniPlayerMetadata(track.uri, track.imageUrl, track.title, track.artist, Modifier.weight(1f))
             EmberIconButton(EmberIcons.Devices, Lang.t(Lang.Key.PLAYER_SELECT_DEVICE), onOutputs, tint = MaterialTheme.colorScheme.primary)
-            TrackHeart(track.uri, onLibraryChanged)
+            SaveMediaButton(track.uri, onLibraryChanged)
             IconButton(
                 onClick = player::togglePlayPause,
                 interactionSource = pausePress,
@@ -1557,7 +1564,7 @@ internal fun TrackActions(
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                 )
-                TrackHeart(uri, onLibraryChanged)
+                SaveMediaButton(uri, onLibraryChanged)
                 HorizontalDivider(Modifier.padding(horizontal = 16.dp))
                 SheetAction(R.drawable.ember_ctx_add_to_playlist, Lang.t(Lang.Key.PL_ADD_TO)) {
                     showMenu = false
@@ -1576,7 +1583,7 @@ internal fun TrackActions(
                     }
                 }
                 onAddToJam?.let { addToJam ->
-                    SheetAction(R.drawable.ember_ctx_add_to_queue, Lang.t(Lang.Key.PLAYER_ADD_TO_JAM)) {
+                    SheetAction(EmberIcons.Groups, Lang.t(Lang.Key.PLAYER_ADD_TO_JAM)) {
                         addToJam()
                         showMenu = false
                         Toast.makeText(context, Lang.t(Lang.Key.PLAYER_ADDED_TO_JAM_QUEUE), Toast.LENGTH_SHORT).show()
@@ -1621,20 +1628,32 @@ internal fun TrackActions(
 }
 
 @Composable
-private fun TrackHeart(uri: String, onLibraryChanged: () -> Unit) {
+private fun SaveMediaButton(uri: String, onLibraryChanged: () -> Unit) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     var saved by remember(uri) { mutableStateOf<Boolean?>(null) }
     var saving by remember(uri) { mutableStateOf(false) }
+    val isEpisode = uri.startsWith("spotify:episode:")
+    val canSave = isEpisode || uri.startsWith("spotify:track:")
     LaunchedEffect(uri) {
-        if (uri.startsWith("spotify:track:") || uri.startsWith("spotify:episode:")) {
+        if (canSave) {
             saved = Spotify.isSaved(context, uri)
         }
     }
-    if (uri.startsWith("spotify:track:") || uri.startsWith("spotify:episode:")) {
+    if (canSave) {
+        val icon = if (isEpisode) {
+            if (saved == true) EmberIcons.Bookmark else EmberIcons.BookmarkBorder
+        } else {
+            if (saved == true) EmberIcons.Favorite else EmberIcons.FavoriteBorder
+        }
+        val label = if (isEpisode) {
+            if (saved == true) Lang.Key.SHEET_REMOVE_FROM_LIBRARY else Lang.Key.SHEET_SAVE_TO_LIBRARY
+        } else {
+            if (saved == true) Lang.Key.PLAYER_REMOVE_FROM_FAVORITES else Lang.Key.PLAYER_ADD_TO_FAVORITES
+        }
         EmberIconButton(
-            if (saved == true) EmberIcons.Favorite else EmberIcons.FavoriteBorder,
-            if (saved == true) Lang.t(Lang.Key.PLAYER_REMOVE_FROM_FAVORITES) else Lang.t(Lang.Key.PLAYER_ADD_TO_FAVORITES),
+            icon,
+            Lang.t(label),
             enabled = !saving,
             tint = if (saved == true) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
             onClick = {
